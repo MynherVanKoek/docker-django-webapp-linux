@@ -37,7 +37,7 @@ pipeline {
                 //     docker.withRegistry('https://' + DOCKER_LOGIN_SERVER, DOCKER_REGISTRY_CREDENTIAL_ID) {
                 //         DOCKER_IMAGE.push()
                 //     }
-                }
+                // }
             }
         }
 
