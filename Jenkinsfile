@@ -28,15 +28,15 @@ pipeline {
             steps {
 
                 echo "Building Docker image for $BRANCH_NAME"
-                script {
-                    DOCKER_IMAGE = docker.build "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME}"
-                }
+                // script {
+                //     DOCKER_IMAGE = docker.build "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME}"
+                // }
 
-                echo "Pushing Docker image to registry"
-                script {
-                    docker.withRegistry('https://' + DOCKER_LOGIN_SERVER, DOCKER_REGISTRY_CREDENTIAL_ID) {
-                        DOCKER_IMAGE.push()
-                    }
+                // echo "Pushing Docker image to registry"
+                // script {
+                //     docker.withRegistry('https://' + DOCKER_LOGIN_SERVER, DOCKER_REGISTRY_CREDENTIAL_ID) {
+                //         DOCKER_IMAGE.push()
+                //     }
                 }
             }
         }
@@ -80,13 +80,13 @@ pipeline {
 
             steps {
                 
-                azureWebAppPublish azureCredentialsId: AZURE_SERVICE_PRINCIPAL_ID, 
+                azureWebAppPublish azureCredentialsId: "${AZURE_SERVICE_PRINCIPAL_ID}", 
                     publishType: 'docker', 
                     resourceGroup: 'acr-test-rg', 
                     appName: 'hoederer-jenkins-app-svc', 
                     dockerImageName: "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}", 
                     dockerImageTag: 'latest', 
-                    dockerRegistryEndpoint: [credentialsId: DOCKER_REGISTRY_CREDENTIAL_ID, url: 'https://' + DOCKER_LOGIN_SERVER]
+                    dockerRegistryEndpoint: [credentialsId: "${DOCKER_REGISTRY_CREDENTIAL_ID}", url: "https://${DOCKER_LOGIN_SERVER}"]
 
             }
         }
