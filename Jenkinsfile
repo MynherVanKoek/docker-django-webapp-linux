@@ -84,7 +84,7 @@ pipeline {
                     publishType: 'docker', 
                     resourceGroup: 'acr-test-rg', 
                     appName: 'hoederer-jenkins-app-svc', 
-                    dockerImageName: DOCKER_REPO_NAME, 
+                    dockerImageName: "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}", 
                     dockerImageTag: 'latest', 
                     dockerRegistryEndpoint: [credentialsId: DOCKER_REGISTRY_CREDENTIAL_ID, url: 'https://' + DOCKER_LOGIN_SERVER]
 
