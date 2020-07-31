@@ -8,6 +8,7 @@ pipeline {
         DOCKER_REGISTRY_CREDENTIAL_ID = 'hoedereracr.azurecr.io'
         AZURE_STORAGE_CREDENTIAL_ID = 'hoederermonitortest'
         AZURE_STORAGE_CONTAINER_NAME = 'jenkinslogs'
+
     }
 
     // options { timestamps () }
@@ -68,6 +69,28 @@ pipeline {
 
         }
         
+        stage('Publish Web app') {
+
+            environment {
+                DOCKER_LOGIN_SERVER = 'hoedereracr.azurecr.io'
+                DOCKER_REPO_NAME = 'docker-django-webapp-linux'
+                DOCKER_REGISTRY_CREDENTIAL_ID = 'hoedereracr.azurecr.io'
+                AZURE_SERVICE_PRINCIPAL_ID = 'mySp'
+            }
+
+            steps {
+                
+                azureWebAppPublish azureCredentialsId: AZURE_SERVICE_PRINCIPAL_ID, 
+                    publishType: 'docker', 
+                    resourceGroup: 'acr-test-rg', 
+                    appName: 'hoederer-jenkins-app-svc', 
+                    dockerImageName: DOCKER_REPO_NAME, 
+                    dockerImageTag: 'latest', 
+                    dockerRegistryEndpoint: [credentialsId: DOCKER_REGISTRY_CREDENTIAL_ID, url: 'https://' + DOCKER_LOGIN_SERVER]
+
+            }
+        }
+
         // stage('save log build') {
 
         //     steps {
@@ -99,7 +122,7 @@ pipeline {
             sh "rm -f ${WORKSPACE}/log"
 
             sh """
-            cat ${JENKINS_HOME}/jobs/docker-django-webapp-linux/branches/master/builds/${BUILD_NUMBER}/log | grep -v "\\[8mha" > ${WORKSPACE}/log
+            cat ${JENKINS_HOME}/jobs/jenkins-webapp-deployment/branches/master/builds/${BUILD_NUMBER}/log | grep -v "\\[8mha" > ${WORKSPACE}/log
             """
 
             sh "logger -f ${WORKSPACE}/log"
