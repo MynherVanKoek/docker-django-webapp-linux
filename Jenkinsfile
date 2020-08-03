@@ -84,7 +84,7 @@ pipeline {
             steps {
 
                 sh "cp /etc/secrets/az-sp ./az-sp"
-                sh "ll"
+                sh "ls -l"
 
                 sh ". ./az-sp"
                 sh """az login 
