@@ -28,16 +28,16 @@ pipeline {
             steps {
 
                 echo "Building Docker image for $BRANCH_NAME"
-                // script {
-                //     DOCKER_IMAGE = docker.build "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME}"
-                // }
+                script {
+                    DOCKER_IMAGE = docker.build "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME}"
+                }
 
-                // echo "Pushing Docker image to registry"
-                // script {
-                //     docker.withRegistry('https://' + DOCKER_LOGIN_SERVER, DOCKER_REGISTRY_CREDENTIAL_ID) {
-                //         DOCKER_IMAGE.push()
-                //     }
-                // }
+                echo "Pushing Docker image to registry"
+                script {
+                    docker.withRegistry('https://' + DOCKER_LOGIN_SERVER, DOCKER_REGISTRY_CREDENTIAL_ID) {
+                        DOCKER_IMAGE.push()
+                    }
+                }
             }
         }
 
@@ -75,18 +75,40 @@ pipeline {
                 DOCKER_LOGIN_SERVER = 'hoedereracr.azurecr.io'
                 DOCKER_REPO_NAME = 'docker-django-webapp-linux'
                 DOCKER_REGISTRY_CREDENTIAL_ID = 'hoedereracr.azurecr.io'
+                DOCKER_TAG_NAME = 'latest'
+                APP_SVC_NAME = 'hoederer-jenkins-app-svc'
+                APP_SVC_RG = 'acr-test-rg'
                 AZURE_SERVICE_PRINCIPAL_ID = 'mySp'
             }
 
             steps {
+
+                sh "source /etc/secrets/az-sp"
+                sh """az login 
+                    --service-principal 
+                    -u ${CLIENT_ID} 
+                    -p=${CLIENT_SECRET} 
+                    -t ${TENANT}
+                """
+                sh """az webapp config container set 
+                    -n ${APP_SVC_NAME} 
+                    -g ${APP_SVC_RG} 
+                    --docker-custom-image-name ${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME} 
+                    --docker-registry-server-url https://${DOCKER_LOGIN_SERVER}
+                """
+
+                sh """az webapp restart 
+                    -n ${APP_SVC_NAME} 
+                    -g ${APP_SVC_RG} 
+                """
                 
-                azureWebAppPublish azureCredentialsId: "${AZURE_SERVICE_PRINCIPAL_ID}", 
-                    publishType: 'docker', 
-                    resourceGroup: 'acr-test-rg', 
-                    appName: 'hoederer-jenkins-app-svc', 
-                    dockerImageName: "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}", 
-                    dockerImageTag: 'latest', 
-                    dockerRegistryEndpoint: [credentialsId: "${DOCKER_REGISTRY_CREDENTIAL_ID}", url: "https://${DOCKER_LOGIN_SERVER}"]
+                // azureWebAppPublish azureCredentialsId: "${AZURE_SERVICE_PRINCIPAL_ID}", 
+                //     publishType: 'docker', 
+                //     resourceGroup: 'acr-test-rg', 
+                //     appName: 'hoederer-jenkins-app-svc', 
+                //     dockerImageName: "${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}", 
+                //     dockerImageTag: 'latest', 
+                //     dockerRegistryEndpoint: [credentialsId: "${DOCKER_REGISTRY_CREDENTIAL_ID}", url: "https://${DOCKER_LOGIN_SERVER}"]
 
             }
         }
