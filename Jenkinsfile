@@ -85,32 +85,30 @@ pipeline {
 
             steps {
 
-                // sh "cp /etc/secrets/az-sp ./az-sp"
-                // sh ". ./az-sp"
+                withCredentials([azureServicePrincipal(
+                    credentialsId: AZURE_SERVICE_PRINCIPAL_ID, 
+                    clientIdVariable: 'CLIENT_ID', 
+                    clientSecretVariable: 'CLIENT_SECRET', 
+                    tenantIdVariable: 'TENANT')]) {
+                    
+                        sh """az login 
+                            --service-principal 
+                            -u ${CLIENT_ID} 
+                            -p=${CLIENT_SECRET} 
+                            -t ${TENANT}
+                        """
+                        sh """az webapp config container set 
+                            -n ${APP_SVC_NAME} 
+                            -g ${APP_SVC_RG} 
+                            --docker-custom-image-name ${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME} 
+                            --docker-registry-server-url https://${DOCKER_LOGIN_SERVER}
+                        """
 
-                sh "cp /etc/secrets/az-sp.groovy ./az-sp.groovy"
-                script {
-                    azspsec = load "az-sp.groovy"
-                    println azspsec.CLIENT_ID
+                        sh """az webapp restart 
+                            -n ${APP_SVC_NAME} 
+                            -g ${APP_SVC_RG} 
+                        """
                 }
-
-                sh """az login 
-                    --service-principal 
-                    -u ${CLIENT_ID} 
-                    -p=${CLIENT_SECRET} 
-                    -t ${TENANT}
-                """
-                sh """az webapp config container set 
-                    -n ${APP_SVC_NAME} 
-                    -g ${APP_SVC_RG} 
-                    --docker-custom-image-name ${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME} 
-                    --docker-registry-server-url https://${DOCKER_LOGIN_SERVER}
-                """
-
-                sh """az webapp restart 
-                    -n ${APP_SVC_NAME} 
-                    -g ${APP_SVC_RG} 
-                """
                 
                 // azureWebAppPublish azureCredentialsId: "${AZURE_SERVICE_PRINCIPAL_ID}", 
                 //     publishType: 'docker', 
