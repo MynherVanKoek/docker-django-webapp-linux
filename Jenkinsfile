@@ -89,21 +89,21 @@ pipeline {
                     clientSecretVariable: 'CLIENT_SECRET', 
                     tenantIdVariable: 'TENANT')]) {
                     
-                        sh """az login 
-                            --service-principal 
-                            -u ${CLIENT_ID} 
-                            -p=${CLIENT_SECRET} 
+                        sh """az login \
+                            --service-principal \ 
+                            -u ${CLIENT_ID} \
+                            -p=${CLIENT_SECRET}\ 
                             -t ${TENANT}
                         """
-                        sh """az webapp config container set 
-                            -n ${APP_SVC_NAME} 
-                            -g ${APP_SVC_RG} 
-                            --docker-custom-image-name ${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME} 
+                        sh """az webapp config container set \ 
+                            -n ${APP_SVC_NAME} \
+                            -g ${APP_SVC_RG} \
+                            --docker-custom-image-name ${DOCKER_LOGIN_SERVER}/${DOCKER_REPO_NAME}:${DOCKER_TAG_NAME} \ 
                             --docker-registry-server-url https://${DOCKER_LOGIN_SERVER}
                         """
 
-                        sh """az webapp restart 
-                            -n ${APP_SVC_NAME} 
+                        sh """az webapp restart \
+                            -n ${APP_SVC_NAME} \
                             -g ${APP_SVC_RG} 
                         """
                 }
