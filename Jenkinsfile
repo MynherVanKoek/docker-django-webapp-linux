@@ -83,7 +83,9 @@ pipeline {
 
             steps {
 
-                sh "source /etc/secrets/az-sp"
+                sh "cp /etc/secrets/az-sp ./az-sp"
+
+                sh ". az-sp"
                 sh """az login 
                     --service-principal 
                     -u ${CLIENT_ID} 
