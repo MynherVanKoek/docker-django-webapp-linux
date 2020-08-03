@@ -91,7 +91,7 @@ pipeline {
                 sh "cp /etc/secrets/az-sp.groovy ./az-sp.groovy"
                 script {
                     azspsec = load "az-sp.groovy"
-                    println azspsec
+                    println azspsec.CLIENT_ID
                 }
 
                 sh """az login 
