@@ -1,3 +1,5 @@
+def azspsec
+
 pipeline {
     agent any
 
@@ -83,10 +85,13 @@ pipeline {
 
             steps {
 
-                sh "cp /etc/secrets/az-sp ./az-sp"
-                sh "ls -l"
+                // sh "cp /etc/secrets/az-sp ./az-sp"
+                // sh ". ./az-sp"
 
-                sh ". ./az-sp"
+                sh "cp /etc/secrets/az-sp.groovy ./az-sp.groovy"
+                azspsec = load "az-sp.groovy"
+                println azspsec
+                
                 sh """az login 
                     --service-principal 
                     -u ${CLIENT_ID} 
